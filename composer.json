@@ -1,0 +1,35 @@
+{
+    "name": "ecommerly/shopware-connector",
+    "description": "Read-only Ecommerly connector for Shopware 6",
+    "version": "0.1.0",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "shopware/core": "~6.6.0 || ~6.7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "extra": {
+        "shopware-plugin-class": "Ecommerly\\Connector\\EcommerlyConnector",
+        "label": {
+            "en-GB": "Ecommerly Connector",
+            "de-DE": "Ecommerly Connector"
+        },
+        "description": {
+            "en-GB": "Answers read-only Ecommerly capability requests over a signed-request protocol.",
+            "de-DE": "Beantwortet schreibgeschuetzte Ecommerly-Anfragen ueber ein signiertes Anfrageprotokoll."
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Ecommerly\\Connector\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ecommerly\\Connector\\Tests\\": "tests/"
+        }
+    }
+}

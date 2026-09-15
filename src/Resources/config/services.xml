@@ -1,0 +1,124 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <!-- Kept in step with composer.json by PluginVersionTest, which
+             fails if the two ever disagree: the manifest reports this
+             value to Ecommerly, so a stale number would misreport which
+             module a merchant is actually running. -->
+        <parameter key="ecommerly_connector.version">0.1.0</parameter>
+    </parameters>
+
+    <services>
+        <!-- Routing: a scope of its own, so these endpoints inherit
+             neither admin OAuth nor storefront session handling. -->
+        <service id="Ecommerly\Connector\Framework\Routing\EcommerlyRouteScope">
+            <tag name="shopware.route_scope"/>
+        </service>
+
+        <!-- Connection -->
+        <service id="Ecommerly\Connector\Connection\SignatureValidator"/>
+
+        <service id="Ecommerly\Connector\Connection\SecretCipher">
+            <argument>%kernel.secret%</argument>
+        </service>
+
+        <service id="Ecommerly\Connector\Connection\ConnectionConfig">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Ecommerly\Connector\Connection\SecretCipher"/>
+        </service>
+
+        <service id="Ecommerly\Connector\Connection\NonceStore">
+            <argument type="service" id="cache.object"/>
+        </service>
+
+        <service id="Ecommerly\Connector\Connection\SignedRequestVerifier">
+            <argument type="service" id="Ecommerly\Connector\Connection\ConnectionConfig"/>
+            <argument type="service" id="Ecommerly\Connector\Connection\SignatureValidator"/>
+            <argument type="service" id="Ecommerly\Connector\Connection\NonceStore"/>
+        </service>
+
+        <service id="Ecommerly\Connector\Connection\PairingService">
+            <argument type="service" id="http_client"/>
+            <argument type="service" id="Ecommerly\Connector\Connection\ConnectionConfig"/>
+        </service>
+
+        <!-- Capability layer -->
+        <service id="Ecommerly\Connector\Capability\EditionDetector">
+            <argument>%kernel.bundles%</argument>
+            <argument>%kernel.shopware_version%</argument>
+        </service>
+
+        <service id="Ecommerly\Connector\Capability\ScopeResolver"/>
+
+        <service id="Ecommerly\Connector\Capability\CapabilityRegistry">
+            <argument type="tagged_iterator" tag="ecommerly.capability_handler"/>
+        </service>
+
+        <service id="Ecommerly\Connector\Capability\Handler\GetStoreContextHandler">
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="language.repository"/>
+            <argument type="service" id="currency.repository"/>
+            <argument type="service" id="customer_group.repository"/>
+            <argument type="service" id="Ecommerly\Connector\Capability\EditionDetector"/>
+            <argument>%ecommerly_connector.version%</argument>
+            <tag name="ecommerly.capability_handler"/>
+        </service>
+
+        <service id="Ecommerly\Connector\Capability\Handler\SearchProductsHandler">
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="Ecommerly\Connector\Capability\ScopeResolver"/>
+            <tag name="ecommerly.capability_handler"/>
+        </service>
+
+        <service id="Ecommerly\Connector\Capability\Handler\GetProductHandler">
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="seo_url.repository"/>
+            <argument type="service" id="Ecommerly\Connector\Capability\ScopeResolver"/>
+            <tag name="ecommerly.capability_handler"/>
+        </service>
+
+        <!-- Controllers -->
+        <service id="Ecommerly\Connector\Api\Controller\ManifestController" public="true">
+            <argument type="service" id="Ecommerly\Connector\Connection\SignedRequestVerifier"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="Ecommerly\Connector\Capability\CapabilityRegistry"/>
+            <argument type="service" id="Ecommerly\Connector\Connection\ConnectionConfig"/>
+            <argument type="service" id="Ecommerly\Connector\Capability\EditionDetector"/>
+            <argument>%ecommerly_connector.version%</argument>
+        </service>
+
+        <service id="Ecommerly\Connector\Api\Controller\HealthController" public="true">
+            <argument type="service" id="Ecommerly\Connector\Connection\SignedRequestVerifier"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service id="Ecommerly\Connector\Api\Controller\CapabilityController" public="true">
+            <argument type="service" id="Ecommerly\Connector\Connection\SignedRequestVerifier"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="Ecommerly\Connector\Capability\CapabilityRegistry"/>
+            <argument type="service" id="Ecommerly\Connector\Connection\ConnectionConfig"/>
+        </service>
+
+        <!-- Commands -->
+        <service id="Ecommerly\Connector\Command\PairCommand">
+            <argument type="service" id="Ecommerly\Connector\Connection\PairingService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Ecommerly\Connector\Command\StatusCommand">
+            <argument type="service" id="Ecommerly\Connector\Connection\ConnectionConfig"/>
+            <argument type="service" id="Ecommerly\Connector\Capability\CapabilityRegistry"/>
+            <argument type="service" id="Ecommerly\Connector\Capability\EditionDetector"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Ecommerly\Connector\Command\DisconnectCommand">
+            <argument type="service" id="Ecommerly\Connector\Connection\ConnectionConfig"/>
+            <tag name="console.command"/>
+        </service>
+    </services>
+</container>

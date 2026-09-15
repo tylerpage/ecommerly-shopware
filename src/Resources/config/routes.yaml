@@ -1,0 +1,5 @@
+ecommerly_connector_controller:
+    resource:
+        path: ../../Api/Controller/
+        namespace: Ecommerly\Connector\Api\Controller
+    type: attribute

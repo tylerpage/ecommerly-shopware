@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+    <card>
+        <title>Ecommerly</title>
+        <title lang="de-DE">Ecommerly</title>
+
+        <input-field type="bool">
+            <name>enabled</name>
+            <label>Accept requests from Ecommerly</label>
+            <helpText>Turn this off to stop answering without unpairing. Pairing is kept, so turning it back on needs no new token.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="url">
+            <name>ecommerlyBaseUrl</name>
+            <label>Ecommerly URL</label>
+            <helpText>Where this store sends its pairing request, for example https://app.ecommerly.com. Set this before running bin/console ecommerly:pair.</helpText>
+        </input-field>
+    </card>
+</config>
